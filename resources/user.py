@@ -1,0 +1,16 @@
+import sqlite3
+from flask_restful import Resource,reqparse
+from models.user import UserModel
+
+
+class UserRegister(Resource):
+    parser = reqparse.RequestParser()
+    parser.add_argument('username',required=True,type=str,help="you should type your username")
+    parser.add_argument('password',required=True,type=str,help="you should type your password")
+    def post(self):
+        data = UserRegister.parser.parse_args()
+        if UserModel.find_by_username(data['username']):
+            return {'message':'account already exists'}, 400
+        user = UserModel(**data)
+        UserModel.save_to_db(user)
+        return {'message':'account created'}
