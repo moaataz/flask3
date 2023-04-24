@@ -1,22 +1,24 @@
 from flask_restful import Resource, reqparse
 from models.user import UserModel
+from hmac import compare_digest
+from flask_jwt_extended import create_access_token,create_refresh_token
 
 
+parser = reqparse.RequestParser()
+parser.add_argument('username',
+                    type=str,
+                    required=True,
+                    help="This field cannot be blank."
+                    )
+parser.add_argument('password',
+                    type=str,
+                    required=True,
+                    help="This field cannot be blank."
+                    )
 class UserRegister(Resource):
-    parser = reqparse.RequestParser()
-    parser.add_argument('username',
-                        type=str,
-                        required=True,
-                        help="This field cannot be blank."
-                        )
-    parser.add_argument('password',
-                        type=str,
-                        required=True,
-                        help="This field cannot be blank."
-                        )
 
     def post(self):
-        data = UserRegister.parser.parse_args()
+        data = parser.parse_args()
 
         if UserModel.find_by_username(data['username']):
             return {"message": "A user with that username already exists"}, 400
@@ -39,3 +41,17 @@ class User(Resource):
             return {'message':'user not found'},404
         user.delete_from_db()
         return {'message':'user deleted'},200
+
+class UserLogin(Resource):
+    def post(self):
+        data = parser.parse_args()
+        user = UserModel.find_by_username(data['username'])
+        if user and compare_digest(user.password,data['password']):
+            access_token = create_access_token(user.id,fresh=True)
+            refresh_token = create_refresh_token(user.id)
+            return {
+                'access_token':access_token,
+                'refresh_token':refresh_token,
+            },201
+        
+        return {'message':'invalid credientals'},401
