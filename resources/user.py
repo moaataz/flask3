@@ -77,9 +77,11 @@ class UserLogout(Resource):
     @classmethod
     @jwt_required()
     def post(cls):
-        jti = get_jwt()["jti"]  # jti is "jwt id", a unique identifier for a jwt
+        print(get_jwt())
+        jti = get_jwt()["jti"]  # jti is "jwt id", a unique identifier for a
+        user_id = get_jwt()["identity"]
         BLACKLIST.add(jti)
-        return {"message": USER_LOGGED_OUT}, 201
+        return {"message": USER_LOGGED_OUT.format(user_id=user_id)}, 201
 
 
 class TokenRefresh(Resource):
