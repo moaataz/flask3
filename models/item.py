@@ -1,6 +1,7 @@
 from db import db
-from typing import Dict,List
+from typing import Dict,List,Union
 
+ItemJson = Dict[str,Union[int,str,float]]
 
 class ItemModel(db.Model):
     __tablename__ = 'items'
@@ -17,7 +18,7 @@ class ItemModel(db.Model):
         self.price = price
         self.store_id = store_id
 
-    def json(self)-> Dict:
+    def json(self)-> ItemJson:
         return {'id':self.id,'store_id':self.store_id,'name': self.name, 'price': self.price}
 
     @classmethod
