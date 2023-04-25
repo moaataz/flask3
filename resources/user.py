@@ -9,12 +9,20 @@ from flask_jwt_extended import (
 )
 from blacklist import BLACKLIST
 
+BLANK_ERROR = "'{}' cannot be blank."
+USER_ALREADY_EXISTS = "A user with that username already exists."
+CREATED_SUCCESSFULLY = "User created successfully."
+USER_NOT_FOUND = "User not found."
+USER_DELETED = "User deleted."
+INVALID_CREDENTIALS = "Invalid credentials!"
+USER_LOGGED_OUT = "User <id={user_id}> successfully logged out."
+
 parser = reqparse.RequestParser()
 parser.add_argument(
-    "username", type=str, required=True, help="This field cannot be blank."
+    "username", type=str, required=True, help=BLANK_ERROR.format("username")
 )
 parser.add_argument(
-    "password", type=str, required=True, help="This field cannot be blank."
+    "password", type=str, required=True, help=BLANK_ERROR.format("password")
 )
 
 
@@ -23,27 +31,27 @@ class UserRegister(Resource):
         data = parser.parse_args()
 
         if UserModel.find_by_username(data["username"]):
-            return {"message": "A user with that username already exists"}, 400
+            return {"message": USER_ALREADY_EXISTS}, 400
 
         user = UserModel(**data)
         user.save_to_db()
 
-        return {"message": "User created successfully."}, 201
+        return {"message": CREATED_SUCCESSFULLY}, 201
 
 
 class User(Resource):
     def get(self, user_id: int):
         user = UserModel.find_by_id(user_id).first()
         if not user:
-            return {"message": "user not found"}, 404
+            return {"message": USER_NOT_FOUND}, 404
         return user.json()
 
     def delete(self, user_id: int):
         user = UserModel.find_by_id(user_id).first()
         if not user:
-            return {"message": "user not found"}, 404
+            return {"message": USER_NOT_FOUND}, 404
         user.delete_from_db()
-        return {"message": "user deleted"}, 200
+        return {"message": USER_DELETED}, 200
 
 
 class UserLogin(Resource):
@@ -58,7 +66,7 @@ class UserLogin(Resource):
                 "refresh_token": refresh_token,
             }, 201
 
-        return {"message": "invalid credientals"}, 401
+        return {"message": INVALID_CREDENTIALS}, 401
 
 
 class UserLogout(Resource):
@@ -66,7 +74,7 @@ class UserLogout(Resource):
     def post(self):
         jti = get_jwt()["jti"]  # jti is "jwt id", a unique identifier for a jwt
         BLACKLIST.add(jti)
-        return {"message": "successfully logged out"}, 201
+        return {"message": USER_LOGGED_OUT}, 201
 
 
 class TokenRefresh(Resource):
