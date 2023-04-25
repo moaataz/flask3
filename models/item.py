@@ -22,7 +22,7 @@ class ItemModel(db.Model):
         return {'id':self.id,'store_id':self.store_id,'name': self.name, 'price': self.price}
 
     @classmethod
-    def find_all(cls)-> List:
+    def find_all(cls)-> List["ItemModel"]:
         return cls.query.all()
 
     @classmethod
