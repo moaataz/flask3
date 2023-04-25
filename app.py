@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
 
@@ -8,7 +8,7 @@ from ma import marsh
 from db import db
 
 from resources.item import Item, ItemList
-
+from marshmallow import ValidationError
 from resources.store import Store, StoreList
 from blacklist import BLACKLIST
 
@@ -76,6 +76,11 @@ def revoked_token_callback(_, __):
 @jwt.token_in_blocklist_loader
 def token_in_blocklist_callback(_, decrypted_token):
     return decrypted_token["jti"] in BLACKLIST
+
+
+@app.errorhandler(ValidationError)
+def handle_marshmallow_validation(err):
+    return jsonify(err.messages), 400
 
 
 api.add_resource(Store, "/store/<string:name>")

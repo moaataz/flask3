@@ -28,10 +28,9 @@ class Item(Resource):
             return {"message": NAME_ALREADY_EXISTS.format(name)}, 400
         data_json = request.get_json()
         data_json["name"] = name
-        try:
-            data = item_schema.load(data_json)
-        except ValidationError as err:
-            return err.messages, 400
+
+        data = item_schema.load(data_json)
+
         data.name = name
 
         try:
@@ -61,10 +60,7 @@ class Item(Resource):
             item.price = item_json["price"]
         else:
             item_json["name"] = name
-            try:
-                item = item_schema.load(item_json)
-            except ValidationError as err:
-                return err.messages, 400
+            item = item_schema.load(item_json)
 
         item.save_to_db()
 
