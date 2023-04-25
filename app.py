@@ -2,9 +2,10 @@ from flask import Flask
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
 
-from resources.user import UserRegister,User,UserLogin,TokenRefresh
+from resources.user import UserRegister,User,UserLogin,TokenRefresh,UserLogout
 from resources.item import Item, ItemList
 from resources.store import Store, StoreList
+from blacklist import BLACKLIST
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
@@ -46,8 +47,12 @@ def needs_fresh_token_callback():
     return {'description':'the token is not refresh','error':'fresh_token_required'},401
 
 @jwt.revoked_token_loader
-def revoked_token_callback():
+def revoked_token_callback(_,__):
     return {'description':'the token has been revoked','error':'token_revoked'},401
+
+@jwt.token_in_blocklist_loader
+def token_in_blocklist_callback(_,decrypted_token):
+    return decrypted_token['jti'] in BLACKLIST
 
 api.add_resource(Store, '/store/<string:name>')
 api.add_resource(StoreList, '/stores')
@@ -56,6 +61,7 @@ api.add_resource(ItemList, '/items')
 api.add_resource(UserRegister, '/register')
 api.add_resource(User, '/user/<int:user_id>')
 api.add_resource(UserLogin,'/login')
+api.add_resource(UserLogout,'/logout')
 api.add_resource(TokenRefresh,'/refresh')
 
 if __name__ == '__main__':
