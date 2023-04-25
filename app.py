@@ -4,6 +4,9 @@ from flask_jwt_extended import JWTManager
 
 from resources.user import UserRegister, User, UserLogin, TokenRefresh, UserLogout
 
+from ma import marsh
+from db import db
+
 # from resources.item import Item, ItemList
 # from resources.store import Store, StoreList
 from blacklist import BLACKLIST
@@ -85,7 +88,6 @@ api.add_resource(UserLogout, "/logout")
 api.add_resource(TokenRefresh, "/refresh")
 
 if __name__ == "__main__":
-    from db import db
-
+    marsh.init_app(app)
     db.init_app(app)
     app.run(port=5000, debug=True)

@@ -1,11 +1,9 @@
-from marshmallow import Schema, fields
+from models.user import UserModel
+from ma import marsh
 
 
-class UserSchema(Schema):
+class UserSchema(marsh.SQLAlchemySchema):
     class Meta:
+        model = UserModel
         load_only = ("password",)
         dump_only = ("id",)
-
-    id = fields.Int()
-    username = fields.Str(required=True)
-    password = fields.Str(required=True)
