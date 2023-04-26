@@ -1,6 +1,5 @@
 from marshmallow import Schema, fields
 from werkzeug.datastructures import FileStorage
-from typing import Optional, Mapping, Any
 
 
 class FileStorageField(fields.Field):
