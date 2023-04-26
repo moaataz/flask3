@@ -10,7 +10,7 @@ from db import db
 from resources.item import Item, ItemList
 from marshmallow import ValidationError
 from resources.store import Store, StoreList
-from resources.image import UploadImage, Image
+from resources.image import UploadImage, Image, AvatarUpload
 from blacklist import BLACKLIST
 from dotenv import load_dotenv
 from flask_uploads import configure_uploads, patch_request_class
@@ -99,6 +99,7 @@ api.add_resource(UserLogout, "/logout")
 api.add_resource(TokenRefresh, "/refresh")
 api.add_resource(UploadImage, "/upload/image")
 api.add_resource(Image, "/image/<string:filename>")
+api.add_resource(AvatarUpload, "/upload/avatar")
 
 if __name__ == "__main__":
     marsh.init_app(app)

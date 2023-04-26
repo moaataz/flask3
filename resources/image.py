@@ -53,3 +53,30 @@ class Image(Resource):
             return {"message": f"file with name '{filename}' is not exists"}, 404
         except:
             return {"message": "an error occured please try again later"}, 500
+
+
+class AvatarUpload(Resource):
+    @jwt_required()
+    def put(self):
+        data = image_schema.load(request.files)
+        filename = f"user_{get_jwt_identity()}"
+        folder = "avatars"
+        avatar_path = image_helper.find_image_any_format(filename, folder)
+        if avatar_path:
+            try:
+                os.remove(avatar_path)
+            except:
+                return {"message": "an error occured please try again later"}, 500
+        try:
+            ext = image_helper.get_extension(data["image"].filename)
+            avatar = filename + ext
+            avatar_path = image_helper.save_image(
+                data["image"], folder=folder, name=avatar
+            )
+            basename = image_helper.get_basename(avatar_path)
+            return {"message": f"image with name '{basename}' uploaded successfully"}
+        except UploadNotAllowed:
+            extension = image_helper.get_extension(avatar_path)
+            return {
+                "message": f"extension '{extension}' is not allowed please try another image"
+            }
