@@ -1,5 +1,6 @@
 from marshmallow import Schema, fields
 from werkzeug.datastructures import FileStorage
+from typing import Optional, Mapping, Any
 
 
 class FileStorageField(fields.Field):
@@ -7,7 +8,7 @@ class FileStorageField(fields.Field):
         "invalid": "you entered invalid image please check extension"
     }
 
-    def _deserialize(self, value, __, _) -> FileStorage:
+    def _deserialize(self, value, attr, data, **kwargs) -> FileStorage:
         if value is None:
             return None
         if not isinstance(value, FileStorage):

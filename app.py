@@ -10,13 +10,18 @@ from db import db
 from resources.item import Item, ItemList
 from marshmallow import ValidationError
 from resources.store import Store, StoreList
+from resources.image import UploadImage
 from blacklist import BLACKLIST
 from dotenv import load_dotenv
+from flask_uploads import configure_uploads, patch_request_class
+from libs.image_helper import IMAGE_SET
 
 app = Flask(__name__)
 load_dotenv(".env", verbose=True)
 app.config.from_object("default_config")
 app.config.from_envvar("APPLICATION_SETTINGS")
+patch_request_class(app, 10 * 1024 * 1024)
+configure_uploads(app, IMAGE_SET)
 api = Api(app)
 
 
@@ -92,9 +97,10 @@ api.add_resource(User, "/user/<int:user_id>")
 api.add_resource(UserLogin, "/login")
 api.add_resource(UserLogout, "/logout")
 api.add_resource(TokenRefresh, "/refresh")
+api.add_resource(UploadImage, "/upload/image")
 
 if __name__ == "__main__":
     marsh.init_app(app)
     db.init_app(app)
     create_db()
-    app.run(port=5000, debug=True)
+    app.run(port=5000)

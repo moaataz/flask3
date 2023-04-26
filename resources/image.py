@@ -10,9 +10,8 @@ image_schema = ImageSchema()
 
 
 class UploadImage(Resource):
-    @classmethod
-    @jwt_required
-    def post(cls):
+    @jwt_required()
+    def post(self):
         data = image_schema.load(request.files)
         user_id = get_jwt_identity()
         folder = f"user_{user_id}"

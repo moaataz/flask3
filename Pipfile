@@ -13,6 +13,7 @@ marshmallow-sqlalchemy = "*"
 flask-uploads = "*"
 flask = "*"
 python-dotenv = "*"
+werkzeug = "*"
 
 [dev-packages]
 
