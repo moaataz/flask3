@@ -11,18 +11,13 @@ from resources.item import Item, ItemList
 from marshmallow import ValidationError
 from resources.store import Store, StoreList
 from blacklist import BLACKLIST
+from dotenv import load_dotenv
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///data.db"
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["PROPAGATE_EXCEPTIONS"] = True
-app.secret_key = "jose"
+load_dotenv(".env", verbose=True)
+app.config.from_object("default_config")
+app.config.from_envvar("APPLICATION_SETTINGS")
 api = Api(app)
-
-
-@app.before_first_request
-def create_tables():
-    db.create_all()
 
 
 jwt = JWTManager(app)  # /auth
@@ -83,6 +78,11 @@ def handle_marshmallow_validation(err):
     return jsonify(err.messages), 400
 
 
+def create_db():
+    with app.app_context():
+        db.create_all()
+
+
 api.add_resource(Store, "/store/<string:name>")
 api.add_resource(StoreList, "/stores")
 api.add_resource(Item, "/item/<string:name>")
@@ -96,4 +96,5 @@ api.add_resource(TokenRefresh, "/refresh")
 if __name__ == "__main__":
     marsh.init_app(app)
     db.init_app(app)
+    create_db()
     app.run(port=5000, debug=True)
