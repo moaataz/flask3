@@ -5,12 +5,11 @@ from flask_restful import Api
 from flask_jwt_extended import JWTManager
 from marshmallow import ValidationError
 
-from flask_sqlalchemy import SQLAlchemy
 from ma import ma
 from resources.user import UserRegister, UserLogin, User
 from dotenv import load_dotenv
 from flask_migrate import Migrate
-from flask_sqlalchemy import SQLAlchemy
+from db import db
 
 app = Flask(__name__)
 load_dotenv(".env")
@@ -23,11 +22,12 @@ app.config["PROPAGATE_EXCEPTIONS"] = True
 app.secret_key = "jose"
 api = Api(app)
 jwt = JWTManager(app)
-db = SQLAlchemy(app)
+db.init_app(app)
 migrate = Migrate(app, db)
 
 
 def create_tables():
+    ma.init_app(app)
     with app.app_context():
         db.create_all()
 
@@ -42,6 +42,5 @@ api.add_resource(User, "/user/<int:user_id>")
 api.add_resource(UserLogin, "/login")
 
 if __name__ == "__main__":
-    ma.init_app(app)
     create_tables()
     app.run(port=5000, debug=True)
