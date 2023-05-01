@@ -8,9 +8,10 @@ from marshmallow import ValidationError
 from db import db
 from ma import ma
 from resources.user import UserRegister, UserLogin, User
-
+from dotenv import load_dotenv
 
 app = Flask(__name__)
+load_dotenv(".env")
 app.config["DEBUG"] = True
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
     "DATABASE_URI", "sqlite:///data.db"
@@ -22,9 +23,9 @@ api = Api(app)
 jwt = JWTManager(app)
 
 
-@app.before_first_request
 def create_tables():
-    db.create_all()
+    with app.app_context():
+        db.create_all()
 
 
 @app.errorhandler(ValidationError)
@@ -39,4 +40,5 @@ api.add_resource(UserLogin, "/login")
 if __name__ == "__main__":
     db.init_app(app)
     ma.init_app(app)
+    create_tables()
     app.run(port=5000, debug=True)
