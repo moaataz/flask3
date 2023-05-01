@@ -15,6 +15,8 @@ flask = "*"
 python-dotenv = "*"
 werkzeug = "*"
 flask-migrate = "*"
+psycopg2-binary = "*"
+psycopg2 = "*"
 
 [dev-packages]
 
