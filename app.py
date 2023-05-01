@@ -9,6 +9,7 @@ from db import db
 from ma import ma
 from resources.user import UserRegister, UserLogin, User
 from dotenv import load_dotenv
+from flask_migrate import Migrate
 
 app = Flask(__name__)
 load_dotenv(".env")
@@ -21,6 +22,7 @@ app.config["PROPAGATE_EXCEPTIONS"] = True
 app.secret_key = "jose"
 api = Api(app)
 jwt = JWTManager(app)
+migrate = Migrate(app, db)
 
 
 def create_tables():
