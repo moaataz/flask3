@@ -4,21 +4,19 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-flask-restful = "*"
-flask-sqlalchemy = "*"
-marshmallow = "*"
-flask-marshmallow = "*"
-flask-jwt-extended = "*"
-marshmallow-sqlalchemy = "*"
-flask-uploads = "*"
-flask = "*"
+"psycopg2" = "*"
+Flask = "*"
+Flask-JWT-Extended = "*"
+Flask-RESTful = "*"
+Flask-SQLAlchemy = "*"
 python-dotenv = "*"
-werkzeug = "*"
-flask-migrate = "*"
-psycopg2-binary = "*"
-psycopg2 = "*"
+marshmallow-sqlalchemy = "*"
+marshmallow = "==3.0.0b12"
 
 [dev-packages]
 
 [requires]
-python_version = "3.9"
+python_version = "3.7"
+
+[pipenv]
+allow_prereleases = true
