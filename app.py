@@ -4,6 +4,7 @@ from flask_jwt_extended import JWTManager
 from marshmallow import ValidationError
 from dotenv import load_dotenv
 from resources.user import UserRegister, UserLogin, User
+from flask_migrate import Migrate
 
 load_dotenv(".env")
 from resources.github_login import GithubLogin, GithubAuthorize
@@ -12,12 +13,13 @@ from db import db
 from ma import ma
 from oa import oauth
 
-
 app = Flask(__name__)
 app.config.from_object("default_config")
 app.config.from_envvar("APPLICATION_SETTINGS")
 api = Api(app)
 jwt = JWTManager(app)
+db.init_app(app)
+Migrate(app, db)
 
 
 def create_tables():
@@ -37,7 +39,6 @@ api.add_resource(GithubLogin, "/login/github")
 api.add_resource(GithubAuthorize, "/login/github/authorized")
 
 if __name__ == "__main__":
-    db.init_app(app)
     ma.init_app(app)
     oauth.init_app(app)
     app.run(port=5000)
