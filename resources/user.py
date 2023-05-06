@@ -1,7 +1,7 @@
 from flask_restful import Resource
 from flask import request, g
 from hmac import compare_digest
-from flask_jwt_extended import create_access_token, create_refresh_token
+from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required
 from libs.strings import gettext
 from models.user import UserModel
 from schemas.user import UserSchema
@@ -63,3 +63,17 @@ class UserLogin(Resource):
             return {"access_token": access_token, "refresh_token": refresh_token}, 200
 
         return {"message": gettext("user_invalid_credentials")}, 401
+
+
+class SetPassword(Resource):
+    @classmethod
+    @jwt_required(fresh=True)
+    def post(self):
+        user_json = request.get_json()
+        user_data = user_schema.load(user_json)
+        user = UserModel.find_by_username(username=user_data.username)
+        if not user:
+            return {"message": "user not found"}, 404
+        user.password = user_data.password
+        user.save_to_db()
+        return {"message": "password updated successfully"}, 201
