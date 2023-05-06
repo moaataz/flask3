@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from resources.user import UserRegister, UserLogin, User
 
 load_dotenv(".env")
-from resources.github_login import GithubLogin
+from resources.github_login import GithubLogin, GithubAuthorize
 
 from db import db
 from ma import ma
@@ -34,6 +34,7 @@ api.add_resource(UserRegister, "/register")
 api.add_resource(User, "/user/<int:user_id>")
 api.add_resource(UserLogin, "/login")
 api.add_resource(GithubLogin, "/login/github")
+api.add_resource(GithubAuthorize, "/login/github/authorized")
 
 if __name__ == "__main__":
     db.init_app(app)
