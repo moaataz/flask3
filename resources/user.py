@@ -1,10 +1,11 @@
 from flask_restful import Resource
-from flask import request
+from flask import request, g
 from hmac import compare_digest
 from flask_jwt_extended import create_access_token, create_refresh_token
 from libs.strings import gettext
 from models.user import UserModel
 from schemas.user import UserSchema
+from libs.test_flask_lib import function_accessing_global
 
 user_schema = UserSchema()
 
@@ -54,7 +55,8 @@ class UserLogin(Resource):
         user_data = user_schema.load(user_json)
 
         user = UserModel.find_by_username(user_data.username)
-
+        g.token = "test token"
+        function_accessing_global()
         if user and compare_digest(user.password, user_data.password):
             access_token = create_access_token(identity=user.id, fresh=True)
             refresh_token = create_refresh_token(user.id)
