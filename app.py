@@ -5,13 +5,15 @@ from marshmallow import ValidationError
 from dotenv import load_dotenv
 from resources.user import UserRegister, UserLogin, User
 
+load_dotenv(".env")
+from resources.github_login import GithubLogin
+
 from db import db
 from ma import ma
 from oa import oauth
 
 
 app = Flask(__name__)
-load_dotenv(".env")
 app.config.from_object("default_config")
 app.config.from_envvar("APPLICATION_SETTINGS")
 api = Api(app)
@@ -31,6 +33,7 @@ def handle_marshmallow_validation(err):
 api.add_resource(UserRegister, "/register")
 api.add_resource(User, "/user/<int:user_id>")
 api.add_resource(UserLogin, "/login")
+api.add_resource(GithubLogin, "/login/github")
 
 if __name__ == "__main__":
     db.init_app(app)

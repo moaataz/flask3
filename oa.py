@@ -5,8 +5,8 @@ oauth = OAuth()
 
 github = oauth.remote_app(
     "github",
-    consumer_key=os.environ.get("GITHUB_CONSUMER_KEY"),
-    consumer_secret=os.environ.get("GITHUB_CONSUMER_SECRET"),
+    consumer_key=os.getenv("GITHUB_CONSUMER_KEY"),
+    consumer_secret=os.getenv("GITHUB_CONSUMER_SECRET"),
     request_token_params={"scope": "user:email"},
     base_url="https://api.github.com/",
     request_token_url=None,
