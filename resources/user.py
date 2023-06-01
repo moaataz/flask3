@@ -1,11 +1,17 @@
 from flask_restful import Resource
-from flask import request, g
+from flask import request
 from hmac import compare_digest
-from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required
-from libs.strings import gettext
+from flask_jwt_extended import (
+    create_access_token,
+    create_refresh_token,
+    get_jwt_identity,
+    jwt_required,
+    get_jwt,
+)
 from models.user import UserModel
 from schemas.user import UserSchema
-from libs.test_flask_lib import function_accessing_global
+from blacklist import BLACKLIST
+from libs.strings import gettext
 
 user_schema = UserSchema()
 
@@ -55,8 +61,7 @@ class UserLogin(Resource):
         user_data = user_schema.load(user_json)
 
         user = UserModel.find_by_username(user_data.username)
-        g.token = "test token"
-        function_accessing_global()
+
         if user and compare_digest(user.password, user_data.password):
             access_token = create_access_token(identity=user.id, fresh=True)
             refresh_token = create_refresh_token(user.id)
@@ -65,15 +70,20 @@ class UserLogin(Resource):
         return {"message": gettext("user_invalid_credentials")}, 401
 
 
-class SetPassword(Resource):
+class UserLogout(Resource):
     @classmethod
-    @jwt_required(fresh=True)
-    def post(self):
-        user_json = request.get_json()
-        user_data = user_schema.load(user_json)
-        user = UserModel.find_by_username(username=user_data.username)
-        if not user:
-            return {"message": "user not found"}, 404
-        user.password = user_data.password
-        user.save_to_db()
-        return {"message": "password updated successfully"}, 201
+    @jwt_required()
+    def post(cls):
+        jti = get_jwt()["jti"]  # jti is "JWT ID", a unique identifier for a JWT.
+        user_id = get_jwt_identity()
+        BLACKLIST.add(jti)
+        return {"message": gettext("user_logged_out").format(user_id)}, 200
+
+
+class TokenRefresh(Resource):
+    @classmethod
+    @jwt_required(refresh=True)
+    def post(cls):
+        current_user = get_jwt_identity()
+        new_token = create_access_token(identity=current_user, fresh=False)
+        return {"access_token": new_token}, 200

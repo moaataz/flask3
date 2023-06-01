@@ -3,26 +3,24 @@ from flask_restful import Api
 from flask_jwt_extended import JWTManager
 from marshmallow import ValidationError
 from dotenv import load_dotenv
-from resources.user import UserRegister, UserLogin, User, SetPassword
-from flask_migrate import Migrate
-
-load_dotenv(".env")
-from resources.github_login import GithubLogin, GithubAuthorize
 
 from db import db
 from ma import ma
-from oa import oauth
+from blacklist import BLACKLIST
+from resources.user import UserRegister, UserLogin, User, TokenRefresh, UserLogout
+from resources.item import Item, ItemList
+from resources.store import Store, StoreList
 
 app = Flask(__name__)
+load_dotenv(".env")
 app.config.from_object("default_config")
 app.config.from_envvar("APPLICATION_SETTINGS")
 api = Api(app)
-jwt = JWTManager(app)
-db.init_app(app)
 
 
 def create_tables():
     with app.app_context():
+        db.init_app(app)
         db.create_all()
 
 
@@ -31,17 +29,26 @@ def handle_marshmallow_validation(err):
     return jsonify(err.messages), 400
 
 
+jwt = JWTManager(app)
+
+
+# This method will check if a token is blacklisted, and will be called automatically when blacklist is enabled
+@jwt.token_in_blocklist_loader
+def check_if_token_in_blacklist(decrypted_token):
+    return decrypted_token["jti"] in BLACKLIST
+
+
+api.add_resource(Store, "/store/<string:name>")
+api.add_resource(StoreList, "/stores")
+api.add_resource(Item, "/item/<string:name>")
+api.add_resource(ItemList, "/items")
 api.add_resource(UserRegister, "/register")
 api.add_resource(User, "/user/<int:user_id>")
 api.add_resource(UserLogin, "/login")
-api.add_resource(GithubLogin, "/login/github")
-api.add_resource(
-    GithubAuthorize, "/login/github/authorized", endpoint="github.authorize"
-)
-api.add_resource(SetPassword, "/user/password")
+api.add_resource(TokenRefresh, "/refresh")
+api.add_resource(UserLogout, "/logout")
 
 if __name__ == "__main__":
-    ma.init_app(app)
     create_tables()
-    oauth.init_app(app)
-    app.run(port=5000)
+    ma.init_app(app)
+    app.run(port=5000, debug=True)
