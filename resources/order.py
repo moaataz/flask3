@@ -3,6 +3,9 @@ from flask_restful import Resource, request
 from models.item import ItemModel
 
 from models.order import OrderModel, ItemInOrder
+from schemas.order import OrderSchema
+
+order_schema = OrderSchema()
 
 
 class Order(Resource):
@@ -18,4 +21,7 @@ class Order(Resource):
             items.append(ItemInOrder(item_id=_id, quantity=count))
         order = OrderModel(items=items, status="pending")
         order.save_to_db()
-        order.set_status("something")
+        order.set_status("failed")
+        # order.charge_with_Stripe(data["token"])
+        order.set_status("complete")
+        return order_schema.dump(order)

@@ -2,6 +2,9 @@ import os
 
 from db import db
 from typing import List
+import stripe
+
+CURRENCY = "usd"
 
 item_to_orders = db.Table(
     "items_to_orders",
@@ -35,7 +38,7 @@ class OrderModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     status = db.Column(db.String(20), nullable=False)
 
-    items = db.relationship("ItemInOrder", back_populates="order", lazy="dynamic")
+    items = db.relationship("ItemInOrder", back_populates="order")
 
     @classmethod
     def find_all(cls) -> List["OrderModel"]:
@@ -56,3 +59,12 @@ class OrderModel(db.Model):
     def delete_from_db(self) -> None:
         db.session.delete(self)
         db.session.commit()
+
+    def charge_with_stripe(self, token: str) -> stripe.Charge:
+        stripe.api_key = os.getenv("STRIPE_API_KEY")
+        return stripe.Charge.create(
+            amount=self.amount * 100,
+            currency=CURRENCY,
+            description=self.description,
+            source=token,
+        )

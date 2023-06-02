@@ -15,6 +15,7 @@ flask-oauthlib = "*"
 marshmallow = "*"
 sqlalchemy = "*"
 flask-marshmallow = "*"
+stripe = "*"
 
 [dev-packages]
 
