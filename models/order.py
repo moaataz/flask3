@@ -3,19 +3,19 @@ import os
 from db import db
 from typing import List
 
-# item_to_orders = db.Table(
-#     "items_to_orders",
-#     db.Column(
-#         "item_id",
-#         db.Integer,
-#         db.ForeignKey("items.id"),
-#     ),
-#     db.Column(
-#         "order_id",
-#         db.Integer,
-#         db.ForeignKey("orders.id"),
-#     ),
-# )
+item_to_orders = db.Table(
+    "items_to_orders",
+    db.Column(
+        "item_id",
+        db.Integer,
+        db.ForeignKey("items.id"),
+    ),
+    db.Column(
+        "order_id",
+        db.Integer,
+        db.ForeignKey("orders.id"),
+    ),
+)
 
 
 class OrderModel(db.Model):
@@ -24,7 +24,7 @@ class OrderModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     status = db.Column(db.String(20), nullable=False)
 
-    items = db.relationship("ItemModel", lazy="dynamic")
+    items = db.relationship("ItemModel", secondary=item_to_orders, lazy="dynamic")
 
     @classmethod
     def find_all(cls) -> List["OrderModel"]:

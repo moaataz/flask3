@@ -14,5 +14,6 @@ class Order(Resource):
             if not item:
                 return {"message": "item not found"}, 404
             items.append(item)
-        order = OrderModel(orders=items, status="pending")
+        order = OrderModel(items=items, status="pending")
         order.save_to_db()
+        order.set_status("something")
