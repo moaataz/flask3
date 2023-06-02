@@ -40,6 +40,18 @@ class OrderModel(db.Model):
 
     items = db.relationship("ItemInOrder", back_populates="order")
 
+    @property
+    def description(self):
+        item_counts = [f"{i.quantity}x {i.item.name}" for i in self.items]
+        return ",".join(item_counts)
+
+    @property
+    def amount(self):
+        return int(
+            sum([item_data.price * item_data.quantity for item_data in self.items])
+            * 100
+        )
+
     @classmethod
     def find_all(cls) -> List["OrderModel"]:
         return cls.query.all()
@@ -63,7 +75,7 @@ class OrderModel(db.Model):
     def charge_with_stripe(self, token: str) -> stripe.Charge:
         stripe.api_key = os.getenv("STRIPE_API_KEY")
         return stripe.Charge.create(
-            amount=self.amount * 100,
+            amount=self.amount,
             currency=CURRENCY,
             description=self.description,
             source=token,
